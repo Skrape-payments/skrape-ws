@@ -5,15 +5,27 @@ const numCPUs = require("os").cpus().length;
 const Transactions = require("./models/transactions");
 const { setupMaster, setupWorker } = require("@socket.io/sticky");
 const { createAdapter, setupPrimary } = require("@socket.io/cluster-adapter");
+const mongoose = require("mongoose");
 const networkConfigUrl = {
   mainnet: "https://eth-mainnet.g.alchemy.com/v2/Oj_CY9H3jCVyjLhAFLCYFGaXkzTfLBQ4",
   testnet: "https://polygon-mumbai.g.alchemy.com/v2/glVlKDVRhvPLkgRZsFauFxrC1meoWFxm",
   binance: "https://rpc.ankr.com/bsc",
   polygon: "https://polygon-mainnet.g.alchemy.com/v2/oVuR-NAY5z5tQdXKjC1eyq4bFzmifzrQ",
 };
+const { config } = require("./config");
 
 const erc20Abi = require("./transferConfig/erc20Abi.json");
-
+const connectDb = async () => {
+  try {
+    await mongoose.connect(config.DBURI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log("socket connected to db");
+  } catch (error) {
+    console.log(error);
+  }
+};
 if (cluster.isMaster) {
   console.log(`Master ${process.pid} is running`);
   const httpServer = http.createServer();
@@ -21,10 +33,9 @@ if (cluster.isMaster) {
     loadBalancingMethod: "least-connection", // either "random", "round-robin" or "least-connection"
   });
   setupPrimary();
-  httpServer.listen(3030, () => {
-    console.log("listening on *:3030");
+  httpServer.listen(config.PORT, () => {
+    console.log(`server running on port ${config.PORT}`);
   });
-
   for (let i = 0; i < numCPUs; i++) {
     cluster.fork();
   }
@@ -33,11 +44,17 @@ if (cluster.isMaster) {
     cluster.fork();
   });
 } else {
-  console.log(`socket Worker ${process.pid} started`);
+  console.log(`socket ${process.pid} listening on port ${config.PORT}`);
+  connectDb();
   const httpServer = http.createServer((req, res) => {
     res.statusCode = 200;
     res.setHeader("Content-Type", "text/plain");
-    res.end("Hello, socket!\n");
+    res.writeHead(200, {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*", // REQUIRED CORS HEADER
+      "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept, Content-Type,Authorization,x-access-token,Access-Control-Allow-Origin", // REQUIRED CORS HEADER
+    });
+    res.end(JSON.stringify({ title: "skrape" }));
   });
   const ioServer = new Server(httpServer, {
     cors: {
