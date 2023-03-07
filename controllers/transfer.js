@@ -4,20 +4,12 @@ const { getParsedEthersError } = require("@enzoferey/ethers-error-parser");
 const { NonceManager } = require("@ethersproject/experimental");
 require("dotenv").config();
 const { createSkrapePaymentWallet, createSkrapeAdminWallet } = require("./wallet");
-// const {
-//   getRouterAddress,
-//   getToken,
-//   getTokenBalance,
-//   getSkrapeVault,
-//   payAccount,
-//   getGasTank,
-// } = require("./transferHelper");
 const { config } = require("./transferConfig/config");
 const routerAbi = require("./transferConfig/skrapePaymentAbi.json");
 const erc20Abi = require("./transferConfig/erc20Abi.json");
 // const io = require("socket.io-client");
 // const socket = io("http://localhost:3005");
-const { serverSocket } = require("../controllers/socket");
+const { serverSocket } = require("./socket");
 const socket = serverSocket;
 /**
  *

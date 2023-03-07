@@ -8,7 +8,7 @@ const { createSkrapeAdminWallet } = require("./wallet");
 const { config } = require("./transferConfig/config");
 // const io = require("socket.io-client");
 // const socket = io("http://localhost:3005");
-const { serverSocket } = require("../controllers/socket");
+const { serverSocket } = require("./socket");
 const socket = serverSocket;
 /**
  *
