@@ -4,7 +4,6 @@ const { Server } = require("socket.io");
 const numCPUs = require("os").cpus().length;
 const { setupMaster, setupWorker } = require("@socket.io/sticky");
 const { createAdapter, setupPrimary } = require("@socket.io/cluster-adapter");
-
 const networkConfigUrl = {
   mainnet: "https://eth-mainnet.g.alchemy.com/v2/Oj_CY9H3jCVyjLhAFLCYFGaXkzTfLBQ4",
   testnet: "https://polygon-mumbai.g.alchemy.com/v2/glVlKDVRhvPLkgRZsFauFxrC1meoWFxm",
@@ -21,7 +20,10 @@ if (cluster.isMaster) {
     loadBalancingMethod: "least-connection", // either "random", "round-robin" or "least-connection"
   });
   setupPrimary();
-  httpServer.listen(3000);
+  httpServer.listen(3030, () => {
+    console.log("listening on *:3030");
+  });
+
   for (let i = 0; i < numCPUs; i++) {
     cluster.fork();
   }
@@ -31,7 +33,11 @@ if (cluster.isMaster) {
   });
 } else {
   console.log(`socket Worker ${process.pid} started`);
-  const httpServer = http.createServer();
+  const httpServer = http.createServer((req, res) => {
+    res.statusCode = 200;
+    res.setHeader("Content-Type", "text/plain");
+    res.end("Hello, socket!\n");
+  });
   const ioServer = new Server(httpServer, {
     cors: {
       origin: "*",
