@@ -2,6 +2,7 @@ const cluster = require("cluster");
 const http = require("http");
 const { Server } = require("socket.io");
 const numCPUs = require("os").cpus().length;
+const Transactions = require("./models/transactions");
 const { setupMaster, setupWorker } = require("@socket.io/sticky");
 const { createAdapter, setupPrimary } = require("@socket.io/cluster-adapter");
 const networkConfigUrl = {
